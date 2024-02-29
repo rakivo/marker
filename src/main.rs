@@ -1,5 +1,5 @@
 #![feature(let_chains)]
-#[allow(unused_imports)]
+
 use std::fs::File;
 use std::io::{
     prelude::*,
@@ -8,14 +8,10 @@ use std::io::{
 };
 
 mod states;
-
-use crate::states::{
-    HState,
-    CState
-};
+use states::*;
 
 macro_rules! read_buf {
-    ($buf: ident <- $rbuf: ident) => { // read from input
+    ($buf: ident <- $rbuf: ident) => { // read from user input
         $rbuf.read_line(&mut $buf).ok();
         let $buf = $buf.trim().to_owned();
     };
@@ -46,9 +42,18 @@ macro_rules! cpush {
 
 macro_rules! ECMASB { // ECMASB -> Exit Code Mode After Single Backtick
     ($cbuf: ident <- $arg: expr) => {
-        println!("exited multi-line code mode");
+        coloredprintln!(r."exited multi-line code mode");
         $cbuf.push($arg);
         $cbuf.push("```".to_owned());
+    };
+}
+
+macro_rules! coloredprintln { // in this macro we're using ANSI escape codes
+    (r.$args: expr) => { // r -> red
+        println!("\x1b[31m{}\x1b[0m", $args)
+    };
+    (g.$args: expr) => { // g -> gray
+        println!("\x1b[90m{}\x1b[0m", $args)
     };
 }
 
@@ -76,7 +81,6 @@ fn input_loop(mut h_state: HState, mut c_state: CState, mut input: Vec<String>, 
         let end   = buf.len() - 1;
         let cstate_on = c_state.if_on();
         if cstate_on && first.ne(&Some('`')) { // collect input inside ``` 
-            println!("c: {buf}");
             if buf.chars().nth(end).eq(&Some('`')) {
                 ECMASB!(cbuf <- buf[0..end].to_owned());
                 cpush!(c_state, input <-v cbuf.clone());
@@ -93,13 +97,9 @@ fn input_loop(mut h_state: HState, mut c_state: CState, mut input: Vec<String>, 
         match first {
             '#' => if let Some(h) = buf.chars().nth(1) {
                 if h.is_digit(10) {
-                    match hselect_state!(h_state, h) {
-                        Err(e) => {
-                            eprintln!("ERROR: {e:?}");
-                            continue;
-                        }
-                        Ok(_)  => {}
-                    }
+                    hselect_state!(h_state, h).map_err(|err| {
+                        coloredprintln!(r.err);
+                    }).ok();
                 } else { // interpret # without number after it as single #
                     h_state.select_state(&0).ok(); 
                 }
@@ -109,22 +109,21 @@ fn input_loop(mut h_state: HState, mut c_state: CState, mut input: Vec<String>, 
                     cbuf.push("```".to_owned());
                     if cstate_on {
                         cpush!(c_state, input <-v cbuf.clone());
-                        println!("exited multi-line code mode");
+                        coloredprintln!(g."exited multi-line code mode");
                         cbuf.clear();
                     } else { 
-                        println!("entered multi-line code mode");
+                        coloredprintln!(g."entered multi-line code mode");
                         c_state.on(&true); 
                     }
                     continue;
                 } else if let Some(last) = buf.chars().nth(end) {
                     if last.eq(&'`') { // if single line of code
                         let code = &buf[1..end];
-                        println!("c: {code}");
                         cpush!(c_state, input <- format!("```{code}```"));
                     } else if !cstate_on { // adding extension to ``` things like rs, cpp, c & etc
                         let extens = &buf[1..=end];
                         input.push(format!("```{extens}"));
-                        println!("entered multi-line code mode");
+                        coloredprintln!(g."entered multi-line code mode");
                         c_state.on(&true); 
                     }
                     continue;
@@ -138,10 +137,8 @@ fn input_loop(mut h_state: HState, mut c_state: CState, mut input: Vec<String>, 
             let hinput = format!("{h} {input}", 
                  h = (0..=h).map(|_| "#").collect::<String>(), 
                  input = &buf[3..].to_owned());
-            println!("h: {hinput}");
             input.push(hinput);
         } else { // input without any modes
-            println!("nm: {buf}");
             input.push(buf);
         }
     }

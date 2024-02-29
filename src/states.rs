@@ -1,7 +1,15 @@
+use core::fmt;
+
 #[derive(Debug)]
 // NOC -> not overcomplicated
 pub enum NOCError {
     IndexOutOfBounds
+}
+
+impl fmt::Display for NOCError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "NOC_ERROR: {self:?}")
+    }
 }
 
 // CState -> Code state (in-``` mode)

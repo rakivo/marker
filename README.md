@@ -20,4 +20,11 @@ $ q                               # to quit and save this to test.md file
 ```rs
 println!("hello, world");
 ```
-###### ..The essence of this entire project revolves around crafting a tool that enables faster markdown file creation through the use of intuitive hotkeys and other innovative features.
+
+### Do this to check:
+```shell
+$ cat test.md
+```
+
+###### ..The essence of this entire project to create a ligthweight-nonoverbloated crafting a tool that enables faster markdown file creation through the use of intuitive hotkeys and other innovative features.
+###### By the way this project doesn't use any third party dependencies. It's only std lib of Rust
