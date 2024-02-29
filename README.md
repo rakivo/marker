@@ -6,21 +6,18 @@
 #### For example, #4 translates into \#\#\#\#. A single \#, on its own, transforms into a solitary hashtag. Get ready to elevate your markdown writing experience!
 
 ### Usage:
-```shell
+```
 $ cd marker && cargo run --release
 $ #6 Code: hello world 
-$ \`rs                            # to enter multi line code mode (for rust code)
+$ `rs                             # to enter multi line code mode (for rust code)
 $ println!("hello, world");
-$ \`                              # once again to exit the mode
+$ `                               # once again to exit the mode
 $ q                               # to quit and save this to test.md file
 ```
 
 ### the Marker will interpret that to this:
 ###### Code: hello world
-```
+```rs
 println!("hello, world");
 ```
-
-
-
-#### The essence of this entire project revolves around crafting a tool that enables faster markdown file creation through the use of intuitive hotkeys and other innovative features.
+###### ..The essence of this entire project revolves around crafting a tool that enables faster markdown file creation through the use of intuitive hotkeys and other innovative features.
