@@ -9,10 +9,10 @@
 ```shell
 $ cd marker && cargo run --release
 $ #6 Code: hello world 
-$ \` # to enter multi line code mode
+$ \`rs                            # to enter multi line code mode (for rust code)
 $ println!("hello, world");
-$ \` # once again to exit the mode
-$ q # to quit and save this to test.md file
+$ \`                              # once again to exit the mode
+$ q                               # to quit and save this to test.md file
 ```
 
 ### the Marker will interpret that to this:
@@ -21,4 +21,6 @@ $ q # to quit and save this to test.md file
 println!("hello, world");
 ```
 
-### The essence of this entire project revolves around crafting a tool that enables faster markdown file creation through the use of intuitive hotkeys and other innovative features.
+
+
+#### The essence of this entire project revolves around crafting a tool that enables faster markdown file creation through the use of intuitive hotkeys and other innovative features.
