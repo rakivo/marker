@@ -1,11 +1,11 @@
 #![feature(let_chains)]
 #[allow(unused_imports)]
+use std::fs::File;
 use std::io::{
     prelude::*,
     BufReader,
     BufWriter
 };
-use std::fs::File;
 
 mod states;
 
@@ -13,9 +13,6 @@ use crate::states::{
     HState,
     CState
 };
-
-// TODO:
-// States for md. attrs.
 
 macro_rules! read_buf {
     ($buf: ident <- $rbuf: ident) => { // read from input
@@ -37,8 +34,8 @@ macro_rules! hselect_state {
 }
 
 macro_rules! cpush {
-    ($c_state: ident, $input: ident <-v $cbuf: expr) => { // push vector
-        $input.extend($cbuf);
+    ($c_state: ident, $input: ident <-v $($cbuf: expr), *) => { // push vector
+        $($input.extend($cbuf);)*
         $c_state.off();
     };
     ($c_state: ident, $input: ident <- $($arg: expr), *) => { // push not a vector
@@ -47,7 +44,21 @@ macro_rules! cpush {
     };
 }
 
-// h: in h state, d: in def state
+macro_rules! ECMASB { // ECMASB -> Exit Code Mode After Single Backtick
+    ($cbuf: ident <- $arg: expr) => {
+        println!("exited multi-line code mode");
+        $cbuf.push($arg);
+        $cbuf.push("```".to_owned());
+    };
+}
+
+/* TODO:
+add text formatting things like: bold(**), italic(*);
+
+blockquotes, lists, links, images and other things
+*/
+
+// h: in h state, nm: no mode state, c: code 
 fn input_loop(mut h_state: HState, mut c_state: CState, mut input: Vec<String>, f: File) -> std::io::Result<()> {
     let mut wbuf = BufWriter::new(f); // write buf
     let mut rbuf = BufReader::new(std::io::stdin().lock()); // read buf
@@ -67,9 +78,7 @@ fn input_loop(mut h_state: HState, mut c_state: CState, mut input: Vec<String>, 
         if cstate_on && first.ne(&Some('`')) { // collect input inside ``` 
             println!("c: {buf}");
             if buf.chars().nth(end).eq(&Some('`')) {
-                println!("exited multi-line code mode");
-                cbuf.push(buf[0..end].to_owned());
-                cbuf.push("```".to_owned());
+                ECMASB!(cbuf <- buf[0..end].to_owned());
                 cpush!(c_state, input <-v cbuf.clone());
                 cbuf.clear();
             } else {
@@ -95,7 +104,7 @@ fn input_loop(mut h_state: HState, mut c_state: CState, mut input: Vec<String>, 
                     h_state.select_state(&0).ok(); 
                 }
             }
-            '`' => { // for now we're just ignoring language specification after '`' symbol
+            '`' => { 
                 if end.eq(&0) { // if input is a single char '`'
                     cbuf.push("```".to_owned());
                     if cstate_on {
@@ -112,8 +121,13 @@ fn input_loop(mut h_state: HState, mut c_state: CState, mut input: Vec<String>, 
                         let code = &buf[1..end];
                         println!("c: {code}");
                         cpush!(c_state, input <- format!("```{code}```"));
-                        continue;
+                    } else if !cstate_on { // adding extension to ``` things like rs, cpp, c & etc
+                        let extens = &buf[1..=end];
+                        input.push(format!("```{extens}"));
+                        println!("entered multi-line code mode");
+                        c_state.on(&true); 
                     }
+                    continue;
                 }
             }
             _  => {}
@@ -126,6 +140,9 @@ fn input_loop(mut h_state: HState, mut c_state: CState, mut input: Vec<String>, 
                  input = &buf[3..].to_owned());
             println!("h: {hinput}");
             input.push(hinput);
+        } else { // input without any modes
+            println!("nm: {buf}");
+            input.push(buf);
         }
     }
     fwrite_line!(wbuf <- input);
