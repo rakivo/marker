@@ -1,8 +1,9 @@
 ## SOFTWARE IS NOT FINISED!
 
-### The point of the whole project is to create a tool, that allows you too write md. files faster than usual using hotkeys and things like that.
-
-#### If you put \` into the beginning and the end of yout inpur line, this will interpret the rest of the input as line of code: like that ```for instance```, if you put \# and number of heading level(optionally), for instance: \#4 this will interpret this as \#\#\#\#. (single # without any numbers will be interpreted as single #).
+#### Embrace the power of backticks! Placing \` at both ends of your input line turns the remainder into a code snippet. 
+#### For instance, typing \`for instance\` results in formatted code. 
+#### Additionally, unleash the heading magic by using \# followed by a number to specify the heading level.
+#### For example, #4 translates into \#\#\#\#. A single \#, on its own, transforms into a solitary hashtag. Get ready to elevate your markdown writing experience!
 
 ### Usage:
 ```shell
@@ -14,10 +15,10 @@ $ \` # once again to exit the mode
 $ q # to quit and save this to test.md file
 ```
 
-### the Marker will interpret that to this markdown code:
-```md
+### the Marker will interpret that to this:
 ###### Code: hello world
 ```
 println!("hello, world");
 ```
-```
+
+### The essence of this entire project revolves around crafting a tool that enables faster markdown file creation through the use of intuitive hotkeys and other innovative features.
