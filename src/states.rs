@@ -4,15 +4,10 @@ pub enum NOCError {
     IndexOutOfBounds
 }
 
-pub trait State {
-    fn off_all(&mut self);
-    fn if_any_on(&self) -> Option<usize>;
-}
-
 // CState -> Code state (in-``` mode)
 pub struct CState {
     active:     bool,
-    multi_line: bool
+    multi_line: bool // let's just keep it for now
 }
 
 impl CState {
@@ -27,21 +22,14 @@ impl CState {
         self.active = true;
         self.multi_line = *m;
     }
-}
 
-impl State for CState {
-    fn off_all(&mut self) {
+    pub fn off(&mut self) {
         self.active     = false;
         self.multi_line = false;
     }
 
-    // 0 -> active, 1 -> multi_line
-    fn if_any_on(&self) -> Option<usize> {
-        if self.active {
-            return Some(0)
-        } else if self.multi_line {
-            return Some(1)
-        } None
+    pub fn if_on(&self) -> bool {
+        self.active
     }
 }
 
@@ -61,28 +49,26 @@ impl HState {
         let which = *which;
         if which < 6 {
             self.hs[which] = true;
-            self.off_other(&which);
+            self.off_others(&which);
             Ok(())
         } else {
             Err(NOCError::IndexOutOfBounds)
         }
     }
 
-    pub fn off_other(&mut self, which: &usize) {
+    pub fn off_others(&mut self, which: &usize) {
         for (i, h) in self.hs.iter_mut().enumerate() {
             if i != *which {
                 *h = false
             }
         }
     }
-}
 
-impl State for HState {
-    fn off_all(&mut self) {
+    pub fn off_all(&mut self) {
         self.hs.iter_mut().for_each(|h| *h = false);
     }
 
-    fn if_any_on(&self) -> Option<usize> {
+    pub fn if_any_on(&self) -> Option<usize> {
         for (i, &h) in self.hs.iter().enumerate() {
             if h { return Some(i); }
         } None
