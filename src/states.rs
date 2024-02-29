@@ -8,42 +8,38 @@ pub enum NOCError {
 
 impl fmt::Display for NOCError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "NOC_ERROR: {self:?}")
+        write!(f, "{}", colored!(fr | "NOC_ERROR: {self:?}"))
     }
 }
 
 // CState -> Code state (in-``` mode)
 pub struct CState {
-    active:     bool,
-    multi_line: bool // let's just keep it for now
+    active: bool
+}
+
+// HState -> header state (# things)
+pub struct HState {
+    hs: [bool; 6]
 }
 
 impl CState {
     pub fn new() -> CState {
         CState {
             active:     false,
-            multi_line: false
         }
     }
 
-    pub fn on(&mut self, m: &bool) {
+    pub fn on(&mut self) {
         self.active = true;
-        self.multi_line = *m;
     }
 
     pub fn off(&mut self) {
         self.active     = false;
-        self.multi_line = false;
     }
 
     pub fn if_on(&self) -> bool {
         self.active
     }
-}
-
-// HState -> header state (# things)
-pub struct HState {
-    hs: [bool; 6]
 }
 
 impl HState {
