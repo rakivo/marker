@@ -1,4 +1,7 @@
-use core::fmt;
+use std::fmt::{
+    Display,
+    Formatter
+};
 
 #[derive(Debug)]
 // NOC -> Not OverComplicated
@@ -6,8 +9,8 @@ pub enum NOCError {
     IndexOutOfBounds
 }
 
-impl fmt::Display for NOCError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl Display for NOCError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", colored!(fr | "NOC_ERROR: {self:?}"))
     }
 }

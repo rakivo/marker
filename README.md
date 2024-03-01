@@ -6,7 +6,8 @@
 
 ### Usage:
 ```
-$ cd marker && cargo run --release
+$ cd marker && rustc -C opt-level=3 src/main.rs -o marker 
+$ ./marker
 $ #6 Code: hello world 
 $ `rs                             # to enter multi line code mode (for rust code)
 $ println!("hello, world");
