@@ -9,10 +9,10 @@
 $ cd marker && rustc -C opt-level=3 src/main.rs -o marker 
 $ ./marker
 $ #6 Code: hello world 
-$ `rs                             # to enter multi line code mode (for rust code)
+$ `rs                       # to enter multi line code mode (with rust extension)
 $ println!("hello, world");
-$ `                               # once again to exit the mode
-$ q                               # to quit and save this to test.md file
+$ `                         # once again to exit the mode
+$ q                         # to quit and save this to test.md file
 ```
 
 ### the [Marker](https://github.com/rakivo/marker) will interpret that to this:
@@ -36,10 +36,10 @@ $ cat test.md
 $ ./marker
 $ #6 Code: Testing update 
 $ `py
-$ print("helo");`        # you can close multi-line code backticks like that
-$ ls                     # to print out the whole input we've entered
-$ ^[[A # you can simply press arrow up key to write this thingy
-$ e print("hello");      # to edit current line
+$ print("helo");`   # you can close multi-line code backticks like that
+$ ls                # to print out the whole input we've entered
+$ ↑                 # arrow up key
+$ e print("hello"); # to edit current line
 $ q                               
 ```
 
