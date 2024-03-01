@@ -35,13 +35,13 @@ macro_rules! flush { // little macro to use flush!() instead of std::io::stdout(
 
 fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f: File) -> std::io::Result<()> {
     let mut wbuf = BufWriter::new(f); // write buf
-    let mut rbuf = BufReader::new(std::io::stdin().lock()); // read buf
-    let mut cbuf = Vec::new(); // collect multi-line code inside ``` through iterations
-    let mut buf  = String::new(); // simple buf for input
+    let mut rbuf = BufReader::new(std::io::stdin().lock()); 
+    let mut cbuf = Vec::new();        // collect multi-line code inside ``` through iterations
+    let mut buf  = String::new();     // simple buf for input
 
-    let mut editing = false; // edit mode
-    let mut line: usize = 0; // current line (in edit mode)
-    let mut n:    usize = 0; // buf len
+    let mut editing = false;          // edit mode
+    let mut line: usize = 0;          // current line (in edit mode)
+    let mut n:    usize = 0;          // buf len
 
     loop {
         print!(">");
@@ -172,9 +172,9 @@ fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f:
 
 fn fargs(file_name_: Option<String>, wa: Option<String>) -> File {
     let file_name = if let Some(file_name) = file_name_ { file_name } else { "test".to_owned() };
-    match wa.expect(&colored!(fr | "Invalid arguments")).as_str() {
-        "w" | "write "=> {
-            File::create(format!("{file_name}.md")).expect("Failed to create")
+    match wa.expect(&colored!(fr | "Invalid arguments: file name: {file_name:?} ..")).as_str() {
+        "w" | "write " => {
+            File::create(format!("{file_name}.md")).expect("Failed to create file: {file_name}")
         },
         "a" | "append" => {
             OpenOptions::new()
@@ -185,8 +185,8 @@ fn fargs(file_name_: Option<String>, wa: Option<String>) -> File {
                     panic!("{}", colored!(fr | "ERROR: {err} while appending to the file: {file_name}"));
                 })
         },
-        _   => {
-            panic!("Invalid arguments")
+        _ => {
+            panic!("{}", colored!(fr | "Invalid arguments: file name: {file_name:?} .."))
         }
     }
 }
