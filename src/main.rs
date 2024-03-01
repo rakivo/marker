@@ -10,15 +10,22 @@ use std::io::{
 mod macros;
 mod states;
 use states::{
-    CState,
-    HState
+    CState, // code (block) state
+    HState //  heading state
 };
 
 /* TODO:
-add text formatting things like: bold(**), italic(*);
+feature to read args and writing to end of the file or 
+rewriting this file, based on the provided args;
+ 
+text formatting things like: bold(**), italic(*);
 
-blockquotes, lists, links, images and other things
+blockquotes, lists, links, images and other things;
 */
+
+macro_rules! flush { // little macro to use flush!() instead of std::io::stdout().flush().unwrap()
+    () => { std::io::stdout().flush().unwrap() }
+}
 
 fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f: File) -> std::io::Result<()> {
     let mut wbuf = BufWriter::new(f); // write buf
@@ -28,14 +35,14 @@ fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f:
 
     loop {
         print!(">");
-        std::io::stdout().flush().unwrap(); 
+        flush!();
         hstate.off_all();
         buf.clear();
         read_buf!(buf <- rbuf);
 
         if buf.eq("q") { 
             colored!(pg | "exiting..");
-            std::io::stdout().flush().unwrap(); 
+            flush!(); 
             break; 
         }
 
@@ -44,8 +51,8 @@ fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f:
         let cstate_on = cstate.if_on();
         if cstate_on && first.ne(&Some('`')) { // collect input inside ``` 
             if buf.chars().nth(end).eq(&Some('`')) { // if in code mode your input ends like that: something`
-                ECMASB!(cbuf <- buf[0..end].to_owned());
-                std::io::stdout().flush().unwrap(); 
+                ECMASB!(cbuf <- buf[0..end].to_owned()); // ECMASB -> Exit Code Mode After Single Backtick
+                flush!(); 
                 cpush!(cstate, input <-v cbuf.clone());
                 cbuf.clear();
             } else {
@@ -56,7 +63,6 @@ fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f:
 
         if let Some(first) = first
         { // if there's any special-symbols at the start
-
         match first {
             '#' => if let Some(h) = buf.chars().nth(1) {
                 if h.is_digit(10) {
@@ -67,7 +73,7 @@ fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f:
                     hstate.select_state(&0).ok(); 
                 }
                 colored!(pg | "heading state catched");
-                std::io::stdout().flush().unwrap(); 
+                flush!(); 
             }
             '`' => { 
                 if end.eq(&0) { // if input is a single char '`'
@@ -80,7 +86,7 @@ fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f:
                         colored!(pg | "entered multi-line code mode");
                         cstate.on(); 
                     }
-                    std::io::stdout().flush().unwrap(); 
+                    flush!(); 
                     continue;
                 } else if let Some(last) = buf.chars().nth(end) {
                     if last.eq(&'`') { // if single line of code
@@ -90,7 +96,7 @@ fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f:
                         colored!(pg | "entered multi-line code mode");
                         cstate.on(); 
                     }
-                    std::io::stdout().flush().unwrap(); 
+                    flush!(); 
                     continue;
                 }
             }
@@ -110,7 +116,7 @@ fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f:
     Ok(())
 }
 
-const FILE_NAME: &str = "test"; // if file already exist we're just rewriting it
+const FILE_NAME: &str = "test"; // if file already exists we're just rewriting it
 fn main() -> std::io::Result<()> {
     let hstate = HState::new();
     let cstate = CState::new();

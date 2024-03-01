@@ -1,7 +1,7 @@
 use core::fmt;
 
 #[derive(Debug)]
-// NOC -> not overcomplicated
+// NOC -> Not OverComplicated
 pub enum NOCError {
     IndexOutOfBounds
 }
@@ -12,12 +12,12 @@ impl fmt::Display for NOCError {
     }
 }
 
-// CState -> Code state (in-``` mode)
+// CState -> Code State (in-``` mode)
 pub struct CState {
     active: bool
 }
 
-// HState -> header state (# things)
+// HState -> Header State (# things)
 pub struct HState {
     hs: [bool; 6]
 }
@@ -25,7 +25,7 @@ pub struct HState {
 impl CState {
     pub fn new() -> CState {
         CState {
-            active:     false,
+            active: false,
         }
     }
 
@@ -34,7 +34,7 @@ impl CState {
     }
 
     pub fn off(&mut self) {
-        self.active     = false;
+        self.active = false;
     }
 
     pub fn if_on(&self) -> bool {
@@ -73,7 +73,7 @@ impl HState {
     }
 
     pub fn if_any_on(&self) -> Option<usize> {
-        for (i, &h) in self.hs.iter().enumerate() {
+        for (i, &h) n self.hs.iter().enumerate() {
             if h { return Some(i); }
         } None
     }
