@@ -31,8 +31,6 @@ macro_rules! flush { // little macro to use flush!() instead of std::io::stdout(
     () => { std::io::stdout().flush().unwrap() }
 }
 
-const FILE_NAME: &str = "test"; // if file already exists we're just overwriting it
-
 fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f: File) -> std::io::Result<()> {
     let mut wbuf = BufWriter::new(f);
     let mut rbuf = BufReader::new(std::io::stdin().lock()); // read buf
@@ -175,22 +173,24 @@ fn main() -> std::io::Result<()> {
     if args.len() < 2 {
         eprintln!("{}", colored!(fr | "usage: ./marker <w | a>"));
         eprintln!("{}", colored!(fr | "w: overwrite the file"));
-        eprintln!("{}", colored!(fr | "p: push input to the end of the file"));
-        eprintln!("{}", colored!(fr | "for example: ./marker w"));
+        eprintln!("{}", colored!(fr | "a: push input to the end of the file"));
+        eprintln!("{}", colored!(fg | "optionally you can add file name flag: "));
+        eprintln!("{}", colored!(fg | "for instance: ./marker w hello"));
         return Ok(())
     }
 
+    let file_name = if let Some(file_name) = args.get(2) { file_name } else { "test" };
     let f = match args.get(1).expect(&colored!(fr | "Invalid arguments")).as_str() {
         "w" | "write "=> {
-            File::create(format!("{FILE_NAME}.md"))?
+            File::create(format!("{file_name}.md"))?
         },
         "a" | "append" => {
             OpenOptions::new()
                 .write(true)
                 .append(true)
-                .open(format!("{FILE_NAME}.md"))
+                .open(format!("{file_name}.md"))
                 .unwrap_or_else(|err| {
-                    panic!("{}", colored!(fr | "ERROR: {err} while appending to the file: {FILE_NAME}"));
+                    panic!("{}", colored!(fr | "ERROR: {err} while appending to the file: {file_name}"));
                 })
         },
         _   => {

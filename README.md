@@ -28,7 +28,7 @@ $ cat test.md
 
 ### Update 2024-03-01: 
 > - Added ls command to display the whole input you've entered.
-> - Added flags, use ```$ ./marker w``` to write or ```$ ./marker a``` to append to the file.
+> - Added flags, use ```$ ./marker w``` to write or ```$ ./marker a``` to append to the file. you can optionally use another pretty good flag, which can create and write to the file named based on your input, for instance: ```$ ./marker w hello```, this will create file "hello.md" in your current directory.
 > - You can move your "cursor" with arrows, but now you have to press enter to got it work (no raw mode).
 > - After you moved cursor you can edit the line your cursor in with 'e' command, just type e and your further entry. 
 > #### Examples using this: 
