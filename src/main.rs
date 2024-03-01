@@ -19,12 +19,14 @@ use states::{
 };
 
 /* TODO:
+
 feature to read args and writing to end of the file or 
 rewriting this file, based on the provided args;
  
 text formatting things like: bold(**), italic(*);
 
 blockquotes, lists, links, images and other things;
+
 */
 
 macro_rules! flush { // little macro to use flush!() instead of std::io::stdout().flush().unwrap()
@@ -32,14 +34,14 @@ macro_rules! flush { // little macro to use flush!() instead of std::io::stdout(
 }
 
 fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f: File) -> std::io::Result<()> {
-    let mut wbuf = BufWriter::new(f);
+    let mut wbuf = BufWriter::new(f); // write buf
     let mut rbuf = BufReader::new(std::io::stdin().lock()); // read buf
     let mut cbuf = Vec::new(); // collect multi-line code inside ``` through iterations
     let mut buf  = String::new(); // simple buf for input
 
-    let mut line: usize = 0;
-    let mut n:    usize = 0;
-    let mut editing = false;
+    let mut editing = false; // edit mode
+    let mut line: usize = 0; // current line (in edit mode)
+    let mut n:    usize = 0; // buf len
 
     loop {
         print!(">");
@@ -168,21 +170,11 @@ fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f:
     Ok(())
 }
 
-fn main() -> std::io::Result<()> {
-    let args = args().collect::<Vec<_>>();
-    if args.len() < 2 {
-        eprintln!("{}", colored!(fr | "usage: ./marker <w | a>"));
-        eprintln!("{}", colored!(fr | "w: overwrite the file"));
-        eprintln!("{}", colored!(fr | "a: push input to the end of the file"));
-        eprintln!("{}", colored!(fg | "optionally you can add file name flag: "));
-        eprintln!("{}", colored!(fg | "for instance: ./marker w hello"));
-        return Ok(())
-    }
-
-    let file_name = if let Some(file_name) = args.get(2) { file_name } else { "test" };
-    let f = match args.get(1).expect(&colored!(fr | "Invalid arguments")).as_str() {
+fn fargs(file_name_: Option<String>, wa: Option<String>) -> File {
+    let file_name = if let Some(file_name) = file_name_ { file_name } else { "test".to_owned() };
+    match wa.expect(&colored!(fr | "Invalid arguments")).as_str() {
         "w" | "write "=> {
-            File::create(format!("{file_name}.md"))?
+            File::create(format!("{file_name}.md")).expect("Failed to create")
         },
         "a" | "append" => {
             OpenOptions::new()
@@ -196,11 +188,22 @@ fn main() -> std::io::Result<()> {
         _   => {
             panic!("Invalid arguments")
         }
-    };
+    }
+}
+
+fn main() -> std::io::Result<()> {
+    let args = args().collect::<Vec<_>>();
+    if args.len() < 2 {
+        colored!(pr | "usage: ./marker <w | a>");
+        colored!(pr | "w: overwrite the file");
+        colored!(pr | "a: push input to the end of the file");
+        colored!(pg | "optionally you can add file name flag: ");
+        colored!(pg | "for instance: ./marker w hello");
+        return Ok(())
+    }
 
     let hstate = HState::new();
     let cstate = CState::new();
     let input  = Vec::new();
-
-    input_loop(hstate, cstate, input, f)
+    input_loop(hstate, cstate, input, fargs(args.get(1).cloned(), args.get(2).cloned()))
 }

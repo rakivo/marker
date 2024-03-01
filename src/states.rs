@@ -27,9 +27,7 @@ pub struct HState {
 
 impl CState {
     pub fn new() -> CState {
-        CState {
-            active: false,
-        }
+        CState { active: false }
     }
 
     pub fn on(&mut self) {
@@ -47,9 +45,7 @@ impl CState {
 
 impl HState {
     pub fn new() -> HState {
-        HState {
-            hs: [false; 6]
-        }
+        HState { hs: [false; 6] }
     }
 
     pub fn select_state(&mut self, which: &usize) -> Result<(), NOCError> {
