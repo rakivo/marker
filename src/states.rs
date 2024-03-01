@@ -73,7 +73,7 @@ impl HState {
     }
 
     pub fn if_any_on(&self) -> Option<usize> {
-        for (i, &h) n self.hs.iter().enumerate() {
+        for (i, &h) in self.hs.iter().enumerate() {
             if h { return Some(i); }
         } None
     }
