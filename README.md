@@ -28,6 +28,7 @@ $ cat test.md
 
 ### Update 2024-03-01: 
 > - Added ls command to display the whole input you've entered.
+> - Added flags, use ```$ ./marker w``` to write or ```$ ./marker a``` to append to the file.
 > - You can move your "cursor" with arrows, but now you have to press enter to got it work (no raw mode).
 > - After you moved cursor you can edit the line your cursor in with 'e' command, just type e and your further entry. 
 > #### Examples using this: 
@@ -37,7 +38,7 @@ $ #6 Code: Testing update
 $ `py
 $ print("helo");`        # you can close multi-line code backticks like that
 $ ls                     # to print out the whole input we've entered
-$ ^[[A                   # arrow up key
+$ ^[[A # you can simply press arrow up key to write this thingy
 $ e print("hello");      # to edit current line
 $ q                               
 ```

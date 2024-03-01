@@ -5,8 +5,8 @@ macro_rules! read_buf {
     };
 }
 
-macro_rules! fwrite_line {
-    ($wbuf: ident <- $input: ident) => { // write line to file
+macro_rules! fwrite {
+    ($wbuf: ident <- $input: ident) => { // write array to file
         $input.iter().for_each(|line| $wbuf.write_all(format!("{line}\n").as_bytes()).expect("Failed to write"));
     };
 }

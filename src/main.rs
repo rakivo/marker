@@ -1,9 +1,13 @@
-use std::fs::File;
+use std::env::args;
 use std::io::{
     Write,
     BufRead,
     BufReader,
     BufWriter
+};
+use std::fs::{
+    File,
+    OpenOptions
 };
 
 #[macro_use]
@@ -11,7 +15,7 @@ mod macros;
 mod states;
 use states::{
     CState, // code (block) state
-    HState //  heading state
+    HState  // heading state
 };
 
 /* TODO:
@@ -27,14 +31,17 @@ macro_rules! flush { // little macro to use flush!() instead of std::io::stdout(
     () => { std::io::stdout().flush().unwrap() }
 }
 
+const FILE_NAME: &str = "test"; // if file already exists we're just overwriting it
+
 fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f: File) -> std::io::Result<()> {
-    let mut wbuf = BufWriter::new(f); // write buf
+    let mut wbuf = BufWriter::new(f);
     let mut rbuf = BufReader::new(std::io::stdin().lock()); // read buf
     let mut cbuf = Vec::new(); // collect multi-line code inside ``` through iterations
     let mut buf  = String::new(); // simple buf for input
+
     let mut line: usize = 0;
+    let mut n:    usize = 0;
     let mut editing = false;
-    let mut n: usize = 0;
 
     loop {
         print!(">");
@@ -75,12 +82,6 @@ fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f:
                     println!("{}", colored!(fg | ">{line}"));
                 }
                 continue;
-            }
-            "\x1B[C" => { // → 
-                todo!()
-            }
-            "\x1B[D" => { // ←
-                todo!()
             }
             _        => {}
         } 
@@ -165,15 +166,41 @@ fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f:
             }
         }
     }
-    fwrite_line!(wbuf <- input);
+    fwrite!(wbuf <- input); 
     Ok(())
 }
 
-const FILE_NAME: &str = "test"; // if file already exists we're just rewriting it
 fn main() -> std::io::Result<()> {
+    let args = args().collect::<Vec<_>>();
+    if args.len() < 2 {
+        eprintln!("{}", colored!(fr | "usage: ./marker <w | a>"));
+        eprintln!("{}", colored!(fr | "w: overwrite the file"));
+        eprintln!("{}", colored!(fr | "p: push input to the end of the file"));
+        eprintln!("{}", colored!(fr | "for example: ./marker w"));
+        return Ok(())
+    }
+
+    let f = match args.get(1).expect(&colored!(fr | "Invalid arguments")).as_str() {
+        "w" | "write "=> {
+            File::create(format!("{FILE_NAME}.md"))?
+        },
+        "a" | "append" => {
+            OpenOptions::new()
+                .write(true)
+                .append(true)
+                .open(format!("{FILE_NAME}.md"))
+                .unwrap_or_else(|err| {
+                    panic!("{}", colored!(fr | "ERROR: {err} while appending to the file: {FILE_NAME}"));
+                })
+        },
+        _   => {
+            panic!("Invalid arguments")
+        }
+    };
+
     let hstate = HState::new();
     let cstate = CState::new();
     let input  = Vec::new();
-    let f      = File::create(format!("{FILE_NAME}.md"))?;
+
     input_loop(hstate, cstate, input, f)
 }

@@ -1,2 +1,5 @@
 test.md
 marker
+Cargo.toml
+Cargo.lock
+target
