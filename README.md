@@ -26,5 +26,21 @@ println!("hello, world");
 $ cat test.md
 ```
 
+### Update 2024-03-01: 
+> - Added ls command to display the whole input you've entered.
+> - You can move your "cursor" with arrows, but now you have to press enter to got it work (no raw mode).
+> - After you moved cursor you can edit the line your cursor in with 'e' command, just type e and your further entry. 
+> #### Examples using this: 
+```
+$ ./marker
+$ #6 Code: Testing update 
+$ `py
+$ print("helo");`        # you can close multi-line code backticks like that
+$ ls                     # to print out the whole input we've entered
+$ ^[[A                   # arrow up key
+$ e print("hello");      # to edit current line
+$ q                               
+```
+
 ###### ..The essence of this entire project to create a ligthweight-nonoverbloated crafting a tool that enables faster markdown file creation through the use of intuitive hotkeys and other innovative features.
 ###### By the way this project doesn't use any third party dependencies. It's only std lib of Rust

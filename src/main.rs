@@ -32,6 +32,9 @@ fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f:
     let mut rbuf = BufReader::new(std::io::stdin().lock()); // read buf
     let mut cbuf = Vec::new(); // collect multi-line code inside ``` through iterations
     let mut buf  = String::new(); // simple buf for input
+    let mut line: usize = 0;
+    let mut editing = false;
+    let mut n: usize = 0;
 
     loop {
         print!(">");
@@ -40,11 +43,47 @@ fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f:
         buf.clear();
         read_buf!(buf <- rbuf);
 
-        if buf.eq("q") { 
-            colored!(pg | "exiting..");
-            flush!(); 
-            break; 
-        }
+        match buf.as_str() {
+            "q"      => {
+                colored!(pg | "exiting..");
+                flush!(); 
+                break; 
+            }
+            "ls"     => {
+                input.iter()
+                     .enumerate()
+                     .for_each(|(i, line)| colored!(pg | "{i} {line}"));
+                flush!(); 
+                continue;
+            }
+            "\x1B[A" => { // ↑
+                if line > 0 {
+                    line -= 1;
+                }
+                editing = true;
+                if let Some(line) = input.get(line) {
+                    println!("{}", colored!(fg | ">{line}"));
+                }
+                continue;
+            }
+            "\x1B[B" => { // ↓
+                if line < n - 1 && !input.is_empty() {
+                    line += 1;
+                }
+                editing = true;
+                if let Some(line) = input.get(line) {
+                    println!("{}", colored!(fg | ">{line}"));
+                }
+                continue;
+            }
+            "\x1B[C" => { // → 
+                todo!()
+            }
+            "\x1B[D" => { // ←
+                todo!()
+            }
+            _        => {}
+        } 
 
         let first = buf.chars().nth(0);
         let end   = buf.len() - 1;
@@ -53,6 +92,7 @@ fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f:
             if buf.chars().nth(end).eq(&Some('`')) { // if in code mode your input ends like that: something`
                 ECMASB!(cbuf <- buf[0..end].to_owned()); // ECMASB -> Exit Code Mode After Single Backtick
                 flush!(); 
+                n += cbuf.len(); line += n - 3;
                 cpush!(cstate, input <-v cbuf.clone());
                 cbuf.clear();
             } else {
@@ -79,6 +119,7 @@ fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f:
                 if end.eq(&0) { // if input is a single char '`'
                     cbuf.push("```".to_owned());
                     if cstate_on {
+                        n += cbuf.len(); line += n - 2;
                         cpush!(cstate, input <-v cbuf.clone());
                         colored!(pg | "exited multi-line code mode");
                         cbuf.clear();
@@ -91,8 +132,10 @@ fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f:
                 } else if let Some(last) = buf.chars().nth(end) {
                     if last.eq(&'`') { // if single line of code
                         cpush!(cstate, input <- format!("```{code}```", code = &buf[1..end]));
+                        n += 1; line += 1;
                     } else if !cstate_on { // adding extension to ``` things like rs, cpp, c & etc
-                        input.push(format!("```{extens}", extens = &buf[1..=end]));
+                        cbuf.push(format!("```{extens}", extens = &buf[1..=end]));
+                        n += 1;
                         colored!(pg | "entered multi-line code mode");
                         cstate.on(); 
                     }
@@ -100,16 +143,26 @@ fn input_loop(mut hstate: HState, mut cstate: CState, mut input: Vec<String>, f:
                     continue;
                 }
             }
-            _  => {}
+            'e' => {
+                if editing && line > 0 && line < n {
+                    input[line] = buf[2..].to_owned();
+                } 
+                editing = false;
+                continue;
+            }
+            _   => {}
         }
         }
         if let Some(h) = hstate.if_any_on() { 
             let hinput = format!("{h} {input}", 
                  h = (0..=h).map(|_| "#").collect::<String>(), 
                  input = &buf[3..].to_owned());
-            input.push(hinput);
+            input.push(hinput); n += 1; line += 1;
         } else { // input without any modes
-            input.push(buf);
+            input.push(buf); n += 1; line += 1;
+            if editing {
+                editing = false;
+            }
         }
     }
     fwrite_line!(wbuf <- input);
